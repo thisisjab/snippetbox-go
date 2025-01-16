@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -41,17 +40,4 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("Trying to create a snippet."))
-}
-
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippets/create", createSnippet)
-	mux.HandleFunc("/snippets", showSnippets)
-
-	log.Println("Starting server on :4000")
-
-	err := http.ListenAndServe(":4000", mux)
-
-	log.Fatal(err)
 }
