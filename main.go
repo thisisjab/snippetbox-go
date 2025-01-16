@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w,r)
+		http.NotFound(w, r)
 		return
 	}
 
@@ -21,7 +23,13 @@ func showSnippets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Think of this as an arbitrary list of snippets."))
+	id, err := strconv.Atoi((r.URL.Query().Get("id")))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprintf(w, "Visiting snippet id %d.", id)
 }
 
 func createSnippet(w http.ResponseWriter, r *http.Request) {
