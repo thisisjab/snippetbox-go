@@ -55,7 +55,7 @@ func main() {
 		// TODO: add slog here
 	}
 
-	logger.Info("Starting server on %s", slog.Any("addr", *addr))
+	logger.Info("Starting server", slog.Any("addr", *addr))
 	err := srv.ListenAndServe()
 
 	app.logger.Error(err.Error())
