@@ -9,12 +9,14 @@ import (
 	"os"
 	"web-dev-journey/cmd/web/config"
 	"web-dev-journey/cmd/web/db"
+	"web-dev-journey/internal/models"
 )
 
 type application struct {
-	logger *slog.Logger
-	dbConn *sql.DB
-	config *config.Config
+	logger   *slog.Logger
+	dbConn   *sql.DB
+	config   *config.Config
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -35,7 +37,7 @@ func main() {
 	}
 
 	app.loadConfig()
-	app.connectDB()
+	app.connectDBModels()
 	app.migrateDB(doMigrate, migrationTarget)
 
 	srv := &http.Server{
@@ -61,7 +63,7 @@ func (app *application) loadConfig() {
 	app.config = c
 }
 
-func (app *application) connectDB() {
+func (app *application) connectDBModels() {
 	conn, connErr := db.OpenDB(app.config.DatabasePath())
 
 	if connErr != nil {
@@ -69,6 +71,7 @@ func (app *application) connectDB() {
 	}
 
 	app.dbConn = conn
+	app.snippets = &models.SnippetModel{DB: conn}
 }
 
 func (app *application) migrateDB(doMigrate *bool, target *int) {

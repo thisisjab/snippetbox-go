@@ -1,54 +1,69 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
+	"web-dev-journey/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
+	//files := []string{
+	//	"./ui/html/home.page.tmpl",
+	//	"./ui/html/base.layout.tmpl",
+	//	"./ui/html/footer.partial.tmpl",
+	//}
+	//
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	//	app.serverError(w, r, err)
+	//}
+	//
+	//err = ts.Execute(w, nil)
+	//if err != nil {
+	//	app.serverError(w, r, err)
+	//}
+
+	latest, err := strconv.Atoi(r.URL.Query().Get("latest"))
+
+	if err != nil {
+		latest = 10
 	}
 
-	ts, err := template.ParseFiles(files...)
+	snippets, err := app.snippets.Latest(latest)
+
 	if err != nil {
 		app.serverError(w, r, err)
-		http.Error(w, "Internal server error.", http.StatusInternalServerError)
+		return
 	}
 
-	err = ts.Execute(w, nil)
-	if err != nil {
-		app.serverError(w, r, err)
-		http.Error(w, "Internal server error.", http.StatusInternalServerError)
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "%+v\n", snippet)
 	}
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		w.Header().Set("Allow", "GET")
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
-
 	id, err := strconv.Atoi(r.PathValue("id"))
+
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
 	}
 
-	fmt.Fprintf(w, "Visiting snippet id %d.", id)
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
-
 	w.Write([]byte("Trying to create a snippet."))
 }
