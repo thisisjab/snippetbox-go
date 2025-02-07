@@ -1,4 +1,4 @@
-CREATE TABLE snippets (
+CREATE TABLE IF NOT EXISTS snippets (
                           id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                           title VARCHAR(100) NOT NULL,
                           content TEXT NOT NULL,
@@ -6,4 +6,4 @@ CREATE TABLE snippets (
                           expires DATETIME NOT NULL
 );
 
-CREATE INDEX idx_snippets_created ON snippets(created);
+CREATE INDEX IF NOT EXISTS idx_snippets_created ON snippets(created);
