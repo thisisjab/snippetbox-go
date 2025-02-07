@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"os"
@@ -12,10 +12,9 @@ import (
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	dbConn   *sql.DB
-	config   *config.Config
+	logger *slog.Logger
+	dbConn *sql.DB
+	config *config.Config
 }
 
 func main() {
@@ -25,12 +24,14 @@ func main() {
 
 	flag.Parse()
 
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.LUTC)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
+	loggerHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelDebug,
+	})
+	logger := slog.New(loggerHandler)
 
 	app := &application{
-		infoLog:  infoLog,
-		errorLog: errorLog,
+		logger: logger,
 	}
 
 	app.loadConfig()
@@ -38,22 +39,23 @@ func main() {
 	app.migrateDB(doMigrate, migrationTarget)
 
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:    *addr,
+		Handler: app.routes(),
+		// TODO: add slog here
 	}
 
-	infoLog.Printf("Starting server on %s", *addr)
+	logger.Info("Starting server on %s", slog.Any("addr", *addr))
 	err := srv.ListenAndServe()
 
-	errorLog.Fatal(err)
+	app.logger.Error(err.Error())
+	os.Exit(1)
 }
 
 func (app *application) loadConfig() {
 	c, configErr := config.LoadConfig()
 
 	if configErr != nil {
-		app.errorLog.Fatalf("Error loading config: %v", configErr)
+		app.logger.Error("Error loading config: %v", configErr)
 	}
 
 	app.config = c
@@ -63,7 +65,7 @@ func (app *application) connectDB() {
 	conn, connErr := db.OpenDB(app.config.DatabasePath())
 
 	if connErr != nil {
-		app.errorLog.Fatalf("Error connecting to database: %v", connErr)
+		app.logger.Error("Error connecting to database: %v", connErr)
 	}
 
 	app.dbConn = conn
@@ -82,10 +84,10 @@ func (app *application) migrateDB(doMigrate *bool, target *int) {
 		migrationErr := ms.RunMigrations(app.dbConn, target, upgrade)
 
 		if migrationErr != nil {
-			app.errorLog.Fatalf("Error running migrations: %v", migrationErr)
+			app.logger.Error("Error running migrations: %v", migrationErr)
 		}
 
-		app.infoLog.Print("Applied migrations")
+		app.logger.Info("Applied migrations")
 	}
 
 }

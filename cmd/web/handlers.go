@@ -8,10 +8,6 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
 
 	files := []string{
 		"./ui/html/home.page.tmpl",
@@ -21,13 +17,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		app.serverError(w, err)
+		app.serverError(w, r, err)
 		http.Error(w, "Internal server error.", http.StatusInternalServerError)
 	}
 
 	err = ts.Execute(w, nil)
 	if err != nil {
-		app.serverError(w, err)
+		app.serverError(w, r, err)
 		http.Error(w, "Internal server error.", http.StatusInternalServerError)
 	}
 }
@@ -39,7 +35,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
