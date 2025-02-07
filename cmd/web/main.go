@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"math"
 	"net/http"
@@ -13,10 +14,11 @@ import (
 )
 
 type application struct {
-	logger   *slog.Logger
-	dbConn   *sql.DB
-	config   *config.Config
-	snippets *models.SnippetModel
+	logger        *slog.Logger
+	dbConn        *sql.DB
+	config        *config.Config
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -32,8 +34,15 @@ func main() {
 	})
 	logger := slog.New(loggerHandler)
 
+	templateCache, tcErr := newTemplateCache()
+	if tcErr != nil {
+		logger.Error(tcErr.Error())
+		os.Exit(1)
+	}
+
 	app := &application{
-		logger: logger,
+		logger:        logger,
+		templateCache: templateCache,
 	}
 
 	app.loadConfig()
