@@ -1,19 +1,17 @@
 {{ template "base" .}}
 
-    {{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
-    {{define "body"}}
-        <div class='snippet'>
-            <div class='metadata'>
-                <strong>{{.Snippet.Title}}</strong>
-                <span>#{{.Snippet.ID}}</span>
-            </div>
-            <pre><code>{{.Snippet.Content}}</code></pre>
-            <div class='metadata'>
-                <time>Created: {{.Snippet.Created.Format "2006-01-02 3:04PM"}}</time>
-                <time>Expires: {{.Snippet.Expires.Format "2006-01-02 3:04PM"}}</time>
-            </div>
+{{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
+{{define "body"}}
+    <div class='snippet'>
+        <div class='metadata'>
+            <strong>{{.Snippet.Title}}</strong>
+            <span>#{{.Snippet.ID}}</span>
         </div>
-    {{end}}
+        <pre><code>{{.Snippet.Content}}</code></pre>
+        <div class='metadata'>
+            <time>Created: {{.Snippet.Created.Format "2006-01-02 3:04PM"}}</time>
+            <time>Expires: {{.Snippet.Expires.Format "2006-01-02 3:04PM"}}</time>
+        </div>
+    </div>
+{{end}}
 
-    {{define "footer"}}
-    {{end}}
