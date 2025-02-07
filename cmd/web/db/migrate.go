@@ -36,8 +36,6 @@ func (ms *MigrationSet) RunMigrations(db *sql.DB, targetVersion int, upgrade boo
 		_ = tx.Rollback()
 	}()
 
-	fmt.Printf("%+v\n", ms.migrations)
-
 	for _, m := range ms.migrations {
 
 		var migrationFilePath string
