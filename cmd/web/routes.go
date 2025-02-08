@@ -9,6 +9,7 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", app.home)
 	mux.HandleFunc("GET /snippets/create", app.createSnippet)
+	mux.HandleFunc("POST /snippets/create", app.snippetCreatePost)
 	mux.HandleFunc("GET /snippets/view/{id}", app.showSnippet)
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
