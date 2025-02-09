@@ -3,24 +3,28 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"html/template"
 	"log/slog"
 	"math"
 	"net/http"
 	"os"
+	"time"
 	"web-dev-journey/cmd/web/config"
 	"web-dev-journey/cmd/web/db"
 	"web-dev-journey/internal/models"
 )
 
 type application struct {
-	config        *config.Config
-	dbConn        *sql.DB
-	formDecoder   *form.Decoder
-	logger        *slog.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+	config         *config.Config
+	dbConn         *sql.DB
+	formDecoder    *form.Decoder
+	logger         *slog.Logger
+	sessionManager *scs.SessionManager
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
 }
 
 func main() {
@@ -53,6 +57,7 @@ func main() {
 	app.loadConfig()
 	app.connectDBModels()
 	app.migrateDB(doMigrate, migrationTarget)
+	app.setupSessionManager()
 
 	srv := &http.Server{
 		Addr:    *addr,
@@ -107,4 +112,12 @@ func (app *application) migrateDB(doMigrate *bool, target *int) {
 		app.logger.Info("Applied migrations")
 	}
 
+}
+
+func (app *application) setupSessionManager() {
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(app.dbConn)
+	sessionManager.Lifetime = 12 * time.Hour
+
+	app.sessionManager = sessionManager
 }

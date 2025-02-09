@@ -7,13 +7,16 @@ import (
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /snippets/create", app.createSnippet)
-	mux.HandleFunc("POST /snippets/create", app.snippetCreatePost)
-	mux.HandleFunc("GET /snippets/view/{id}", app.showSnippet)
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
+
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /snippets/view/{id}", dynamic.ThenFunc(app.showSnippet))
+	mux.Handle("GET /snippets/create", dynamic.ThenFunc(app.createSnippet))
+	mux.Handle("POST /snippets/create", dynamic.ThenFunc(app.snippetCreatePost))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
