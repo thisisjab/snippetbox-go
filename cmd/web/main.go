@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/go-playground/form/v4"
 	"html/template"
 	"log/slog"
 	"math"
@@ -14,9 +15,10 @@ import (
 )
 
 type application struct {
-	logger        *slog.Logger
-	dbConn        *sql.DB
 	config        *config.Config
+	dbConn        *sql.DB
+	formDecoder   *form.Decoder
+	logger        *slog.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -40,8 +42,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	fd := form.NewDecoder()
+
 	app := &application{
 		logger:        logger,
+		formDecoder:   fd,
 		templateCache: templateCache,
 	}
 
