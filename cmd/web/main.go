@@ -34,30 +34,14 @@ func main() {
 
 	flag.Parse()
 
-	loggerHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
-		Level:     slog.LevelDebug,
-	})
-	logger := slog.New(loggerHandler)
+	app := &application{}
 
-	templateCache, tcErr := newTemplateCache()
-	if tcErr != nil {
-		logger.Error(tcErr.Error())
-		os.Exit(1)
-	}
-
-	fd := form.NewDecoder()
-
-	app := &application{
-		logger:        logger,
-		formDecoder:   fd,
-		templateCache: templateCache,
-	}
-
+	app.setupLogger()
 	app.loadConfig()
 	app.connectDBModels()
 	app.migrateDB(doMigrate, migrationTarget)
 	app.setupSessionManager()
+	app.loadTemplates()
 
 	srv := &http.Server{
 		Addr:     *addr,
@@ -65,7 +49,7 @@ func main() {
 		ErrorLog: slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
 	}
 
-	logger.Info("Starting server", slog.Any("addr", *addr))
+	app.logger.Info("Starting server", slog.Any("addr", *addr))
 	err := srv.ListenAndServe()
 
 	app.logger.Error(err.Error())
@@ -120,4 +104,31 @@ func (app *application) setupSessionManager() {
 	sessionManager.Lifetime = 12 * time.Hour
 
 	app.sessionManager = sessionManager
+}
+
+func (app *application) setupLogger() {
+	loggerHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelDebug,
+	})
+	logger := slog.New(loggerHandler)
+
+	app.logger = logger
+}
+
+func (app *application) loadTemplates() {
+	templateCache, tcErr := newTemplateCache()
+
+	if tcErr != nil {
+		app.logger.Error(tcErr.Error())
+		os.Exit(1)
+	}
+
+	app.templateCache = templateCache
+}
+
+func (app *application) setupFormDecoder() {
+	fd := form.NewDecoder()
+
+	app.formDecoder = fd
 }
