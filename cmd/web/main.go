@@ -60,9 +60,9 @@ func main() {
 	app.setupSessionManager()
 
 	srv := &http.Server{
-		Addr:    *addr,
-		Handler: app.routes(),
-		// TODO: add slog here
+		Addr:     *addr,
+		Handler:  app.routes(),
+		ErrorLog: slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
 	}
 
 	logger.Info("Starting server", slog.Any("addr", *addr))
