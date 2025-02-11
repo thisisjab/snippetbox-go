@@ -12,15 +12,21 @@ import (
 type Config struct {
 	databasePath   string
 	migrationsPath string
+	tlsCertPath    string
+	tlsKeyPath     string
 }
 
 func (c *Config) DatabasePath() string   { return c.databasePath }
 func (c *Config) MigrationsPath() string { return c.migrationsPath }
+func (c *Config) TLSCertPath() string    { return c.tlsCertPath }
+func (c *Config) TLSKeyPath() string     { return c.tlsKeyPath }
 
 func LoadConfig() (*Config, error) {
 	cfg := &Config{
 		databasePath:   "./db.sql",
 		migrationsPath: "./cmd/web/db/versions",
+		tlsCertPath:    "./tls/cert.pem",
+		tlsKeyPath:     "./tls/key.pem",
 	}
 
 	v := reflect.ValueOf(cfg).Elem()

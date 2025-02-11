@@ -29,6 +29,7 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	useTLS := flag.Bool("tls", false, "Connection uses TLS if true. Corresponding key and certificate path must be set as env vars.")
 	doMigrate := flag.Bool("doMigrate", false, "Run migrations")
 	migrationTarget := flag.Int("migrationTarget", 0, "Migrations target: Negative values mean downgrade.")
 
@@ -42,17 +43,27 @@ func main() {
 	app.migrateDB(doMigrate, migrationTarget)
 	app.setupSessionManager()
 	app.loadTemplates()
+	app.setupFormDecoder()
 
 	srv := &http.Server{
-		Addr:     *addr,
-		Handler:  app.routes(),
-		ErrorLog: slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
+		Addr:         *addr,
+		Handler:      app.routes(),
+		ErrorLog:     slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
-	app.logger.Info("Starting server", slog.Any("addr", *addr))
-	err := srv.ListenAndServe()
+	app.logger.Info("Starting server", slog.Any("tls", *useTLS), slog.Any("addr", *addr))
+	var serverErr error
 
-	app.logger.Error(err.Error())
+	if *useTLS {
+		serverErr = srv.ListenAndServeTLS(app.config.TLSCertPath(), app.config.TLSKeyPath())
+	} else {
+		serverErr = srv.ListenAndServe()
+	}
+
+	app.logger.Error(serverErr.Error())
 	os.Exit(1)
 }
 
@@ -102,6 +113,7 @@ func (app *application) setupSessionManager() {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(app.dbConn)
 	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 
 	app.sessionManager = sessionManager
 }
