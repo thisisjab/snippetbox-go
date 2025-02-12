@@ -14,7 +14,7 @@ import (
 	"time"
 	"web-dev-journey/cmd/web/config"
 	"web-dev-journey/cmd/web/db"
-	"web-dev-journey/internal/models"
+	"web-dev-journey/internal/model"
 )
 
 type application struct {
@@ -23,8 +23,9 @@ type application struct {
 	formDecoder    *form.Decoder
 	logger         *slog.Logger
 	sessionManager *scs.SessionManager
-	snippets       *models.SnippetModel
+	snippets       *model.SnippetModel
 	templateCache  map[string]*template.Template
+	users          *model.UserModel
 }
 
 func main() {
@@ -85,7 +86,8 @@ func (app *application) connectDBModels() {
 	}
 
 	app.dbConn = conn
-	app.snippets = &models.SnippetModel{DB: conn}
+	app.snippets = &model.SnippetModel{DB: conn}
+	app.users = &model.UserModel{DB: conn}
 }
 
 func (app *application) migrateDB(doMigrate *bool, target *int) {

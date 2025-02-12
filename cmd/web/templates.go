@@ -4,13 +4,13 @@ import (
 	"html/template"
 	"path/filepath"
 	"time"
-	"web-dev-journey/internal/models"
+	"web-dev-journey/internal/model"
 )
 
 type templateData struct {
 	CurrentYear int
-	Snippet     models.Snippet
-	Snippets    []models.Snippet
+	Snippet     model.Snippet
+	Snippets    []model.Snippet
 	Flash       string
 	Form        any
 }
