@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"github.com/alexedwards/scs/sqlite3store"
@@ -46,6 +47,11 @@ func main() {
 	app.loadTemplates()
 	app.setupFormDecoder()
 
+	tlsConfig := &tls.Config{
+		// There is no browser that supports TLS 1.3 and does not support SameSite cookies.
+		MinVersion: tls.VersionTLS13,
+	}
+
 	srv := &http.Server{
 		Addr:         *addr,
 		Handler:      app.routes(),
@@ -53,6 +59,7 @@ func main() {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 
 	app.logger.Info("Starting server", slog.Any("tls", *useTLS), slog.Any("addr", *addr))
