@@ -79,7 +79,7 @@ func (app *application) loadConfig() {
 	c, configErr := config.LoadConfig()
 
 	if configErr != nil {
-		app.logger.Error("Error loading config: %v", configErr)
+		app.logger.Error("Error loading config", "error", configErr)
 	}
 
 	app.config = c
@@ -89,7 +89,7 @@ func (app *application) connectDBModels() {
 	conn, connErr := db.OpenDB(app.config.DatabasePath())
 
 	if connErr != nil {
-		app.logger.Error("Error connecting to database: %v", connErr)
+		app.logger.Error("Error connecting to database", "error", connErr)
 	}
 
 	app.dbConn = conn
@@ -110,7 +110,7 @@ func (app *application) migrateDB(doMigrate *bool, target *int) {
 		migrationErr := ms.RunMigrations(app.dbConn, target, upgrade)
 
 		if migrationErr != nil {
-			app.logger.Error("Error running migrations: %v", migrationErr)
+			app.logger.Error("Error running migrations", "error", migrationErr)
 		}
 
 		app.logger.Info("Applied migrations")
