@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/thisisjab/snippetbox-go/internal/model"
+	"github.com/thisisjab/snippetbox-go/ui"
 	"html/template"
 	"io/fs"
 	"path/filepath"
 	"time"
-	"web-dev-journey/internal/model"
-	"web-dev-journey/ui"
 )
 
 type templateData struct {

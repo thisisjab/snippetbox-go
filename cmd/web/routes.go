@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/justinas/alice"
+	"github.com/thisisjab/snippetbox-go/ui"
 	"net/http"
-	"web-dev-journey/ui"
 )
 
 func (app *application) routes() http.Handler {

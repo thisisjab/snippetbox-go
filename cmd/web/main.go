@@ -7,15 +7,15 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
+	"github.com/thisisjab/snippetbox-go/cmd/web/config"
+	"github.com/thisisjab/snippetbox-go/cmd/web/db"
+	"github.com/thisisjab/snippetbox-go/internal/model"
 	"html/template"
 	"log/slog"
 	"math"
 	"net/http"
 	"os"
 	"time"
-	"web-dev-journey/cmd/web/config"
-	"web-dev-journey/cmd/web/db"
-	"web-dev-journey/internal/model"
 )
 
 type application struct {

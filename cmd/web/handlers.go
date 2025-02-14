@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/thisisjab/snippetbox-go/internal/model"
+	"github.com/thisisjab/snippetbox-go/internal/validator"
 	"net/http"
 	"strconv"
-	"web-dev-journey/internal/model"
-	"web-dev-journey/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {

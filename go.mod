@@ -1,4 +1,4 @@
-module web-dev-journey
+module github.com/thisisjab/snippetbox-go
 
 go 1.23.3
 
