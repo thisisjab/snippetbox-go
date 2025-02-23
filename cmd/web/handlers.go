@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+func (app *application) ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("pong"))
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	latest, err := strconv.Atoi(r.URL.Query().Get("latest"))
 
