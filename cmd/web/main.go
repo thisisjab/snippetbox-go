@@ -24,9 +24,9 @@ type application struct {
 	formDecoder    *form.Decoder
 	logger         *slog.Logger
 	sessionManager *scs.SessionManager
-	snippets       *model.SnippetModel
+	snippets       model.SnippetModelInterface
 	templateCache  map[string]*template.Template
-	users          *model.UserModel
+	users          model.UserModelInterface
 }
 
 func main() {
